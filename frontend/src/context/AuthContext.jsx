@@ -1,14 +1,10 @@
+// =============================================================================
+// frontend/src/context/AuthContext.jsx
+// Refactored Authentication Context utilizing Auth Abstraction Layer
+// =============================================================================
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  onAuthStateChanged, 
-  signInWithPopup, 
-  signOut,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile
-} from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, googleProvider } from "../services/firebase";
+import { authService } from '../auth/authService';
 
 const AuthContext = createContext(null);
 
@@ -18,19 +14,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    // Register the session listener via the abstract Auth Service
+    const unsubscribe = authService.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        setUser({
-          uid: currentUser.uid,
-          name: currentUser.displayName,
-          email: currentUser.email,
-          photoURL: currentUser.photoURL
-        });
+        setUser(currentUser);
         setIsLoggedIn(true);
       } else {
         setUser(null);
@@ -42,79 +29,65 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  /**
+   * Google Federated Sign-in Handler
+   */
   const loginWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      
-      // Store/Update user in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        lastLogin: serverTimestamp()
-      }, { merge: true });
-
+      setLoading(true);
+      const user = await authService.loginWithGoogle();
+      return user;
     } catch (error) {
       console.error("Error signing in with Google:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  /**
+   * Email/Password Account Registration
+   */
   const signUpWithEmail = async (name, email, password) => {
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      const user = result.user;
-
-      // Update Firebase Profile with Name
-      await updateProfile(user, { displayName: name });
-
-      // Store in users database (Firestore)
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name: name,
-        email: email,
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp()
-      });
-
+      setLoading(true);
+      const user = await authService.signUpWithEmail(name, email, password);
       return user;
     } catch (error) {
       console.error("Error in signUpWithEmail:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  /**
+   * Email/Password Account Verification
+   */
   const signInWithEmail = async (email, password) => {
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      const user = result.user;
-
-      // Update last login
-      await setDoc(doc(db, "users", user.uid), {
-        lastLogin: serverTimestamp()
-      }, { merge: true });
-
+      setLoading(true);
+      const user = await authService.signInWithEmail(email, password);
       return user;
     } catch (error) {
       console.error("Error in signInWithEmail:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const login = (name, email) => {
-    // Keep this for backward compatibility or local testing if needed
-    const nextUser = { name, email };
-    setUser(nextUser);
-    setIsLoggedIn(true);
-  };
-
+  /**
+   * Session Termination
+   */
   const logout = async () => {
     try {
-      await signOut(auth);
+      setLoading(true);
+      await authService.logout();
     } catch (error) {
       console.error("Error signing out:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,7 +98,6 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     signUpWithEmail,
     signInWithEmail,
-    login, // Deprecated
     logout
   };
 
@@ -143,4 +115,3 @@ export const useAuth = () => {
   }
   return ctx;
 };
-

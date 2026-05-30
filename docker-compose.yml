@@ -1,0 +1,69 @@
+# =============================================================================
+# docker-compose.yml
+# Container Orchestration for Local RDS-ready Integration Testing
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # Relational SQL Database (Emulates AWS RDS PostgreSQL)
+  postgres:
+    image: postgres:15-alpine
+    container_name: active-recall-db
+    restart: always
+    environment:
+      POSTGRES_USER: recall_user
+      POSTGRES_PASSWORD: recall_password
+      POSTGRES_DB: active_recall_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recall_user -d active_recall_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Flask Production Backend Server (Elastic Beanstalk ready)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: active-recall-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - PORT=5000
+      - SECRET_KEY=local-docker-session-secret-key
+      - DATABASE_URL=postgresql://recall_user:recall_password@postgres:5432/active_recall_db
+      - STORAGE_PROVIDER=local
+      - AUTH_PROVIDER=firebase
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - uploads_volume:/app/uploads
+
+  # React Production Frontend Server (Nginx powered, Amplify compatible)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: active-recall-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+      - VITE_AUTH_PROVIDER=firebase
+      - VITE_DB_TYPE=postgres
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  uploads_volume:

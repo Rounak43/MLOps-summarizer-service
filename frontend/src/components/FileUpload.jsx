@@ -4,8 +4,8 @@ import { CloudUpload, AlertCircle, RefreshCcw, FileText } from 'lucide-react';
 import GlassCard from './GlassCard';
 import SummaryResult from './SummaryResult';
 import { useAuth } from '../context/AuthContext';
-import { saveSummary } from '../services/dataService';
-import { analyzeFull } from '../services/analyzeService';
+import { saveSummary } from '../api/dataService';
+import { analyzeFull } from '../api/analyzeService';
 
 const ACCEPTED_TYPES = [
   'application/pdf',

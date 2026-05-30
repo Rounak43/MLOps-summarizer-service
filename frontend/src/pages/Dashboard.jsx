@@ -13,9 +13,9 @@ import {
   Trash2
 } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
-import { analyzeContent } from '../services/analyzeService';
+import { analyzeContent } from '../api/analyzeService';
 import { useAuth } from '../context/AuthContext';
-import { saveSummary, getUserSummaries, deleteSummary } from '../services/dataService';
+import { saveSummary, getUserSummaries, deleteSummary } from '../api/dataService';
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 

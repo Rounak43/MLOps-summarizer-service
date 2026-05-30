@@ -10,7 +10,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/ToastContext';
 import { cn } from '../utils/cn';
 import { Camera, Edit2, Trash2 } from 'lucide-react';
-import { getUserSummaries, deleteSummary } from '../services/dataService';
+import { getUserSummaries, deleteSummary } from '../api/dataService';
 
 const sectionMotion = {
   initial: { opacity: 0, y: 30 },

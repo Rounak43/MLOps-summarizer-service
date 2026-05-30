@@ -24,7 +24,7 @@ const ACCESS_TYPES = ['Text Only', 'File Upload Only', 'Both'];
 const EXPIRY_OPTIONS = ['30 days', '90 days', '1 year', 'No Expiry'];
 const USAGE_OPTIONS = ['< 100', '100–500', '500–1000', '1000–5000', '5000+'];
 
-const BACKEND = 'http://127.0.0.1:5000';
+const API = import.meta.env.VITE_API_URL;
 const LS_KEY = 'pdf2recall_api_clients';
 
 // ─────────────────────────────────────────────
@@ -97,7 +97,7 @@ const mockApi = {
 
 async function apiCall(path, options = {}) {
   try {
-    const res = await fetch(`${BACKEND}${path}`, { ...options, signal: AbortSignal.timeout(3000) });
+    const res = await fetch(`${API}${path}`, { ...options, signal: AbortSignal.timeout(3000) });
     return { ok: res.ok, data: await res.json(), usedBackend: true };
   } catch {
     return { ok: false, usedBackend: false };
@@ -473,7 +473,7 @@ function ApiKeyModal({ keyData, onClose }) {
           <div className="space-y-1.5">
             <p className="text-xs font-body text-muted">Example Usage</p>
             <div className="rounded-xl bg-black/60 border border-border p-3 overflow-x-auto">
-              <pre className="text-[11px] font-mono text-emerald-300 whitespace-pre-wrap break-all">{`curl -X POST http://127.0.0.1:5000/api/summarize-text \\
+              <pre className="text-[11px] font-mono text-emerald-300 whitespace-pre-wrap break-all">{`curl -X POST ${API}/api/summarize-text \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: ${keyData.apiKey}" \\
   -d '{"text":"Your text here..."}'`}</pre>
@@ -1039,14 +1039,14 @@ const ApiAdmin = () => {
             {[
               {
                 label: 'Summarize Text',
-                code: `curl -X POST http://127.0.0.1:5000/api/summarize-text \\
+                code: `curl -X POST ${API}/api/summarize-text \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: YOUR_API_KEY" \\
   -d '{"text":"Your text here..."}'`,
               },
               {
                 label: 'Summarize File',
-                code: `curl -X POST http://127.0.0.1:5000/api/summarize \\
+                code: `curl -X POST ${API}/api/summarize \\
   -H "X-API-Key: YOUR_API_KEY" \\
   -F "file=@/path/to/document.pdf"`,
               },

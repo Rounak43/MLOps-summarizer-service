@@ -1,0 +1,63 @@
+# =============================================================================
+# Root .gitignore
+# Excludes caches, databases, local uploads, node modules, and environment configs
+# =============================================================================
+
+# System / IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
+
+# Environments & Private Keys
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.json
+!backend/config/config.py
+!frontend/package.json
+!frontend/package-lock.json
+
+# Node.js (Frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.svelte-kit/
+frontend/.next/
+frontend/out/
+frontend/.docusaurus/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# Python (Backend)
+__pycache__/
+*.py[cod]
+*$py.class
+backend/__pycache__/
+backend/*/__pycache__/
+backend/venv/
+backend/.venv/
+backend/env/
+backend/ENV/
+backend/dist/
+backend/build/
+backend/*.egg-info/
+backend/app.db
+backend/instance/
+backend/.pytest_cache/
+
+# Local Storage Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+uploads/
+temp/

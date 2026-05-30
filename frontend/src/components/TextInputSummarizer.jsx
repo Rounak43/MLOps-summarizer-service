@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
 import SummaryResult from './SummaryResult';
 import { useAuth } from '../context/AuthContext';
-import { saveSummary } from '../services/dataService';
-import { analyzeFullText } from '../services/analyzeService';
+import { saveSummary } from '../api/dataService';
+import { analyzeFullText } from '../api/analyzeService';
 
 const MIN_CHARS = 50;
 
